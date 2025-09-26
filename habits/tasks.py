@@ -1,16 +1,20 @@
 from celery import shared_task
+from django.utils import timezone
 
-from telegram_bot.utils import send_telegram_message
-
-from .models import Habit
+from habits.models import Habit
+from habits.utils import send_telegram_message
+from users.models import TelegramUser
 
 
 @shared_task
 def send_habit_reminder():
-    """
-    Отправляет уведомления о привычках, которые нужно выполнить сейчас.
-    """
-    habits = Habit.objects.all()
+    now = timezone.now()
+    habits = Habit.objects.filter(time__hour=now.hour, time__minute=now.minute)
+
     for habit in habits:
-        message = f"Не забудь: {habit.action} в {habit.time} в {habit.place}!"
-        send_telegram_message(habit.user.telegram_chat_id, message)
+        try:
+            chat_id = habit.user.telegram_profile.telegram_chat_id
+            message = f"Напоминание: пора выполнить привычку '{habit.action}' в {habit.place}!"
+            send_telegram_message(chat_id, message)
+        except TelegramUser.DoesNotExist:
+            pass
