@@ -2,8 +2,6 @@ from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
 from django.db import models
 
-from habits.validators import validate_execution_time, validate_periodicity
-
 
 class Habit(models.Model):
     user = models.ForeignKey(
@@ -30,8 +28,6 @@ class Habit(models.Model):
         verbose_name="Время на выполнение (сек)"
     )
     is_public = models.BooleanField(default=False, verbose_name="Публичная")
-    execution_time = models.PositiveIntegerField(validators=[validate_execution_time])
-    periodicity = models.PositiveIntegerField(validators=[validate_periodicity])
 
     def __str__(self):
         return f"{self.user} - {self.action} в {self.time}"
