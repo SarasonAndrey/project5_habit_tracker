@@ -13,6 +13,8 @@ class HabitViewSet(viewsets.ModelViewSet):
     queryset = Habit.objects.all()
 
     def get_queryset(self):
+        if getattr(self, 'swagger_fake_view', False):
+            return Habit.objects.none()
         return Habit.objects.filter(user=self.request.user)
 
     def perform_create(self, serializer):
